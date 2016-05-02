@@ -1,0 +1,22 @@
+{
+    "name": "ariarijp/redash-api-client",
+    "type": "library",
+    "description": "re:dash results API client for PHP.",
+    "license": "MIT",
+    "homepage": "https://github.com/ariarijp/redash-api-client",
+    "authors": [{
+        "name": "ariarijp",
+        "email": "takuya.arita@gmail.com",
+        "homepage": "https://github.com/ariarijp"
+    }],
+    "require": {
+        "php": ">=5.5.0",
+        "guzzlehttp/guzzle": "^6.2",
+        "jms/serializer": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "RedashApiClient\\": "src/RedashApiClient/"
+        }
+    }
+}
