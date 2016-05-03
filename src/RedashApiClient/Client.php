@@ -62,17 +62,38 @@ class Client
             $apiKey = $this->userApiKey;
         }
 
-        $url = $this->baseUrl.sprintf('api/queries/%d/results.json', $id);
-        $res = $this->httpClient->request('GET', $url, [
-            'query' => ['api_key' => $apiKey],
-        ]);
-
-        $object = $this->serializer->deserialize($res->getBody(), Response::class, 'json');
-
+        $jsonString = $this->getJsonString($id, $apiKey);
+        $object = $this->deserialize($jsonString);
         $columns = array_column($object->queryResult->data->columns, 'name');
 
         foreach ($object->queryResult->data->rows as &$row) {
             $callback($row, $columns);
         }
+    }
+
+    /**
+     * @param int    $id
+     * @param string $apiKey
+     *
+     * @return string
+     */
+    private function getJsonString($id, $apiKey)
+    {
+        $url = $this->baseUrl.sprintf('api/queries/%d/results.json', $id);
+        $res = $this->httpClient->request('GET', $url, [
+            'query' => ['api_key' => $apiKey],
+        ]);
+
+        return $res->getBody();
+    }
+
+    /**
+     * @param string $jsonString
+     *
+     * @return RedashApiClient\Response
+     */
+    private function deserialize($jsonString)
+    {
+        return $this->serializer->deserialize($jsonString, Response::class, 'json');
     }
 }
