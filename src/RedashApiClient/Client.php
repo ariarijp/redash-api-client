@@ -64,7 +64,10 @@ class Client
 
         $jsonString = $this->getJsonString($id, $apiKey);
         $object = $this->deserialize($jsonString);
-        $columns = array_column($object->queryResult->data->columns, 'name');
+
+        $columns = array_map(function ($column) {
+            return $column->name;
+        }, $object->queryResult->data->columns);
 
         foreach ($object->queryResult->data->rows as &$row) {
             $callback($row, $columns);
