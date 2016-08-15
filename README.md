@@ -13,7 +13,7 @@ $ composer require ariarijp/redash-api-client dev-master
 ```php
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
 define('REDASH_URL', 'http://localhost:9001/');
 define('REDASH_API_KEY', 'API_KEY_FOR_QUERY');
