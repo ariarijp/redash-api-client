@@ -2,10 +2,11 @@
 
 namespace RedashApiClient;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use JMS\Serializer\SerializerBuilder;
 
-\Doctrine\Common\Annotations\AnnotationRegistry::registerLoader('class_exists');
+AnnotationRegistry::registerLoader('class_exists');
 
 class Client
 {
@@ -32,8 +33,9 @@ class Client
     /**
      * @param string      $baseUrl
      * @param string|null $userApiKey
+     * @param array       $guzzleConfig
      */
-    public function __construct($baseUrl, $userApiKey = null)
+    public function __construct($baseUrl, $userApiKey = null, $guzzleConfig = [])
     {
         $this->baseUrl = $baseUrl;
 
@@ -41,7 +43,7 @@ class Client
             $this->userApiKey = $userApiKey;
         }
 
-        $this->httpClient = new GuzzleHttpClient();
+        $this->httpClient = new GuzzleHttpClient($guzzleConfig);
         $this->serializer = SerializerBuilder::create()->build();
     }
 
@@ -50,7 +52,7 @@ class Client
      * @param string|null $apiKey
      * @param callable    $callback
      *
-     * @throws RedashApiClient\Exception
+     * @throws Exception
      */
     public function getResults($id, $apiKey = null, callable $callback)
     {
@@ -82,7 +84,7 @@ class Client
      */
     private function getJsonString($id, $apiKey)
     {
-        $url = $this->baseUrl.sprintf('api/queries/%d/results.json', $id);
+        $url = $this->baseUrl . sprintf('api/queries/%d/results.json', $id);
         $res = $this->httpClient->request('GET', $url, [
             'query' => ['api_key' => $apiKey],
         ]);
