@@ -5,7 +5,7 @@
 ## Installaton
 
 ```bash
-$ composer require ariarijp/redash-api-client dev-master
+$ composer require ariarijp/redash-api-client
 ```
 
 ## Usage
