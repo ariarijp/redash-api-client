@@ -5,7 +5,7 @@ namespace RedashApiClient;
 use JMS\Serializer\Annotation\SerializedName;
 use JMS\Serializer\Annotation\Type;
 
-class Response
+class ApiResponse
 {
     /**
      * @var QueryResult
@@ -13,4 +13,11 @@ class Response
      * @SerializedName("query_result")
      */
     public $queryResult;
+
+    /**
+     * @var Job
+     * @Type("RedashApiClient\Job")
+     * @SerializedName("job")
+     */
+    public $job;
 }
