@@ -132,7 +132,7 @@ class Client
      * @param int    $id
      * @param string $apiKey
      */
-    private function refresh($id, $apiKey, $parameters = [])
+    public function refresh($id, $apiKey, $parameters = [])
     {
         $response = $this->refreshQueryResult($id, $apiKey, $parameters);
         $apiResponse = $this->deserialize($response);
@@ -156,7 +156,7 @@ class Client
      *
      * @return mixed|\Psr\Http\Message\ResponseInterface
      */
-    private function refreshQueryResult($id, $apiKey, $parameters = [])
+    public function refreshQueryResult($id, $apiKey, $parameters = [])
     {
         $url = $this->baseUrl . sprintf('api/queries/%d/results', $id);
         $params = [
