@@ -52,11 +52,13 @@ class Client
      * @param int         $id
      * @param string|null $queryApiKey
      * @param bool        $refresh
-     * @param callable    $callback
-     *
+     * @param array       $parameters
+     * @param callable|null    $callback
+     * 
+     * @return array|void
      * @throws Exception
      */
-    public function fetch($id, $queryApiKey, $refresh, callable $callback)
+    public function fetch($id, $queryApiKey, $refresh, $parameters = [], callable $callback = null)
     {
         $apiKey = $queryApiKey;
         if (empty($apiKey) || $refresh) {
@@ -67,12 +69,18 @@ class Client
             $apiKey = $this->userApiKey;
         }
 
+        $queryResultId = 0;
         if ($refresh) {
-            $this->refresh($id, $apiKey);
+            $res = $this->refresh($id, $apiKey, $parameters);
+            $queryResultId = $res->job->queryResultId;
         }
 
-        $response = $this->getQueryResult($id, $apiKey);
+        $response = $this->getQueryResult($id, $parameters, $apiKey, $queryResultId);
         $apiResponse = $this->deserialize($response);
+
+        if (!$callback) {
+            return $apiResponse;
+        }
 
         $columns = array_map(function (Column $column) {
             return $column->name;
@@ -86,9 +94,9 @@ class Client
     /**
      * @deprecated use fetch()
      */
-    public function getResults($id, $queryApiKey, callable $callback)
+    public function getResults($id, $queryApiKey, $parameters = [], callable $callback = null)
     {
-        $this->fetch($id, $queryApiKey, false, $callback);
+        $this->fetch($id, $queryApiKey, false, $parameters, $callback);
     }
 
     /**
@@ -97,13 +105,17 @@ class Client
      *
      * @return mixed|ResponseInterface
      */
-    private function getQueryResult($id, $apiKey)
+    private function getQueryResult($id, $parameters = [], $apiKey, $queryResultId = 0)
     {
-        $url = $this->baseUrl.sprintf('api/queries/%d/results.json', $id);
+        $url = $this->baseUrl . sprintf('api/queries/%d/results.json', $id);
 
-        return $this->httpClient->request('GET', $url, [
+        $params = [
             'query' => ['api_key' => $apiKey],
-        ]);
+        ];
+        if ($parameters) {
+            $url = str_replace('results', 'results/' . $queryResultId, $url);
+        }
+        return $this->httpClient->request('GET', $url, $params);
     }
 
     /**
@@ -120,11 +132,11 @@ class Client
      * @param int    $id
      * @param string $apiKey
      */
-    private function refresh($id, $apiKey)
+    private function refresh($id, $apiKey, $parameters = [])
     {
-        $response = $this->refreshQueryResult($id, $apiKey);
+        $response = $this->refreshQueryResult($id, $apiKey, $parameters);
         $apiResponse = $this->deserialize($response);
-
+        $res = null;
         while (true) {
             if (in_array($apiResponse->job->status, [Job::STATUS_SUCCESS, Job::STATUS_FAILURE])) {
                 break;
@@ -133,8 +145,9 @@ class Client
             $res = $this->getJob($apiResponse->job->id, $apiKey);
             $apiResponse = $this->deserialize($res);
 
-            sleep(5);
+            sleep(1);
         }
+        return $res ? $this->deserialize($res) : $res;
     }
 
     /**
@@ -143,13 +156,18 @@ class Client
      *
      * @return mixed|\Psr\Http\Message\ResponseInterface
      */
-    private function refreshQueryResult($id, $apiKey)
+    private function refreshQueryResult($id, $apiKey, $parameters = [])
     {
-        $url = $this->baseUrl.sprintf('api/queries/%d/refresh', $id);
-
-        return $this->httpClient->request('POST', $url, [
+        $url = $this->baseUrl . sprintf('api/queries/%d/results', $id);
+        $params = [
             'query' => ['api_key' => $apiKey],
-        ]);
+            'json' => [
+                'parameters' =>  $parameters,
+                'max_age' => 0
+            ]
+        ];
+        $response = $this->httpClient->request('POST', $url, $params);
+        return $response;
     }
 
     /**
@@ -160,7 +178,7 @@ class Client
      */
     private function getJob($id, $apiKey)
     {
-        $url = $this->baseUrl.sprintf('api/jobs/%s', $id);
+        $url = $this->baseUrl . sprintf('api/jobs/%s', $id);
 
         return $this->httpClient->request('GET', $url, [
             'query' => ['api_key' => $apiKey],
