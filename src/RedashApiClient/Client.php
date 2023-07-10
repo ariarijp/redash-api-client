@@ -161,11 +161,13 @@ class Client
         $url = $this->baseUrl . sprintf('api/queries/%d/results', $id);
         $params = [
             'query' => ['api_key' => $apiKey],
-            'json' => [
-                'parameters' =>  $parameters,
-                'max_age' => 0
-            ]
         ];
+        $params['json'] = [
+            'max_age' => 0
+        ];
+        if($parameters){
+            $params['json']['parameters'] = $parameters;
+        }
         $response = $this->httpClient->request('POST', $url, $params);
         return $response;
     }
