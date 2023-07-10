@@ -22,7 +22,7 @@ class Client
     private $userApiKey = null;
 
     /**
-     * @var SerializerBuilder
+     * @var SerializerBuilder|Object
      */
     private $serializer;
 
@@ -135,15 +135,14 @@ class Client
     public function refresh($id, $apiKey, $parameters = [])
     {
         $response = $this->refreshQueryResult($id, $apiKey, $parameters);
-        $apiResponse = $this->deserialize($response);
         $res = null;
         while (true) {
-            if (in_array($apiResponse->job->status, [Job::STATUS_SUCCESS, Job::STATUS_FAILURE])) {
+            if (in_array($response->job->status, [Job::STATUS_SUCCESS, Job::STATUS_FAILURE])) {
                 break;
             }
 
-            $res = $this->getJob($apiResponse->job->id, $apiKey);
-            $apiResponse = $this->deserialize($res);
+            $res = $this->getJob($response->job->id, $apiKey);
+            $response = $this->deserialize($res);
 
             sleep(1);
         }
@@ -169,7 +168,7 @@ class Client
             $params['json']['parameters'] = $parameters;
         }
         $response = $this->httpClient->request('POST', $url, $params);
-        return $response;
+        return $this->deserialize($response);
     }
 
     /**
