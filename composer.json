@@ -11,7 +11,7 @@
     }],
     "require": {
         "php": ">=5.5.0",
-        "guzzlehttp/guzzle": "^6.2",
+        "guzzlehttp/guzzle": "^6.2|^6.3|^7.0",
         "jms/serializer": "^1.1"
     },
     "autoload": {
