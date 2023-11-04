@@ -1,5 +1,5 @@
 {
-    "name": "ariarijp/redash-api-client",
+    "name": "mjf9999/redash-api-client",
     "type": "library",
     "description": "re:dash results API client for PHP.",
     "license": "MIT",
@@ -11,7 +11,7 @@
     }],
     "require": {
         "php": ">=5.5.0",
-        "guzzlehttp/guzzle": "^6.2",
+        "guzzlehttp/guzzle": "^6.2|^6.3|^7.0",
         "jms/serializer": "^1.1"
     },
     "autoload": {
